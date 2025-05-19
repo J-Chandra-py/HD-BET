@@ -9,12 +9,15 @@ from nnunetv2.inference.predict_from_raw_data import nnUNetPredictor
 sys.stdout = sys.__stdout__
 from HD_BET.paths import folder_with_parameter_files
 
+# def dilate_mask(mask, iterations=1):
 
 def apply_bet(img, bet, out_fname):
     img_itk = sitk.ReadImage(img)
     img_npy = sitk.GetArrayFromImage(img_itk)
-    img_bet = sitk.GetArrayFromImage(sitk.ReadImage(bet))
-    img_npy[img_bet == 0] = 0
+    img_bet = sitk.ReadImage(bet)
+    dilated_bet = sitk.BinaryDilate(img_bet, [5]*3)
+    img_bet_npy = sitk.GetArrayFromImage(dilated_bet)
+    img_npy[img_bet_npy == 0] = 0
     out = sitk.GetImageFromArray(img_npy)
     out.CopyInformation(img_itk)
     sitk.WriteImage(out, out_fname)
